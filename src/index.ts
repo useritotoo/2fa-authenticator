@@ -1,4 +1,4 @@
-import { Hono, type Context } from 'hono';
+import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import type { Env } from './types';
 import accounts from './routes/accounts';
@@ -18,11 +18,22 @@ app.route('/api/accounts', accounts);
 app.route('/api/admin', admin);
 
 // 健康检查
-app.get('/api/health', (c: Context) => c.json({ status: 'ok' }));
+app.get('/api/health', (c) => c.json({ status: 'ok' }));
 
+// 静态资源和 SPA fallback
+app.get('*', async (c) => {
+  const url = new URL(c.req.url);
 
-// API 路由已在上方通过 app.route 挂载
-// 无需在此处处理静态资源，Cloudflare Pages 会自动处理非 API 请求
+  // 尝试获取静态资源
+  let response = await c.env.ASSETS.fetch(c.req.raw);
 
+  // 如果是 404 且不是 API 请求，返回 index.html（SPA fallback）
+  if (response.status === 404 && !url.pathname.startsWith('/api/')) {
+    const indexUrl = new URL('/', c.req.url);
+    response = await c.env.ASSETS.fetch(new Request(indexUrl.toString(), c.req.raw));
+  }
+
+  return response;
+});
 
 export default app;

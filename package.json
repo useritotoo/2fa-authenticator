@@ -5,9 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "wrangler dev",
-    "deploy": "wrangler deploy",
-    "build:web": "npm install --prefix web && npm run build --prefix web",
-    "build": "npm run build:web"
+    "build:web": "cd web && npm install && npm run build",
+    "build:worker": "wrangler deploy --dry-run --outdir web/dist && node -e \"require('fs').renameSync('web/dist/index.js', 'web/dist/_worker.js')\"",
+    "build": "npm run build:web && npm run build:worker",
+    "deploy": "npm run build && wrangler pages deploy web/dist"
   },
   "dependencies": {
     "hono": "^4.0.0"

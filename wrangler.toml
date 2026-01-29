@@ -1,14 +1,5 @@
-# 适用于 Cloudflare Pages 的通用配置文件
-
-# 注意：Pages 不需要指定 main 字段，逻辑由 functions/ 目录处理
+name = "2fa-worker-v2"
+main = "src/index.ts"
 compatibility_date = "2024-01-01"
 
-# Pages 部署所需的构建输出目录
-pages_build_output_dir = "web/dist"
 
-[[kv_namespaces]]
-binding = "KV"
-# 部署说明：
-# 在 Cloudflare Pages 后台 Settings -> Functions -> KV namespace bindings
-# 将变量名 "KV" 绑定到你创建的真实 KV 空间。
-id = "PLACEHOLDER_ID"

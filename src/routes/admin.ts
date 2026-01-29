@@ -1,4 +1,4 @@
-import { Hono, type Context } from 'hono';
+import { Hono } from 'hono';
 import type { Account, Env } from '../types';
 import { createJWT, verifyJWT, getJWTSecret } from '../utils/auth';
 import { getAccounts, saveAccounts, findAccountIndexById, reorderAccounts, buildAccountKey, buildAccountKeySet, buildSecretSet, isAccountDuplicate } from '../utils/kv';
@@ -13,7 +13,7 @@ import {
 const admin = new Hono<{ Bindings: Env }>();
 
 // JWT 认证中间件
-const authMiddleware = async (c: Context, next: () => Promise<void>) => {
+const authMiddleware = async (c: any, next: () => Promise<void>) => {
   const authHeader = c.req.header('Authorization');
   if (!authHeader?.startsWith('Bearer ')) {
     return c.json({ error: 'Unauthorized' }, 401);
@@ -30,7 +30,7 @@ const authMiddleware = async (c: Context, next: () => Promise<void>) => {
 };
 
 // 管理员登录
-admin.post('/login', async (c: Context) => {
+admin.post('/login', async (c) => {
   const { data, error } = await safeParseJson<{ password: string }>(c);
   if (error || !data) {
     return c.json({ error: error || '请求体无效' }, 400);

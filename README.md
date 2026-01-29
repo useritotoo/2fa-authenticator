@@ -42,28 +42,27 @@
 - 设置 `PUBLIC_MODE=true` 启用
 - 适合：个人 2FA 备份、快速查看验证码
 
-## Cloudflare 部署步骤：
-#### 在 Cloudflare 创建项目:
+## 一键部署
 
-- 登录 Cloudflare 控制台 -> Workers & Pages -> Create application -> Pages 选项卡。
-- 点击 Connect to Git，选择你 Fork 的这个仓库。
+[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/zhifu1996/2fa-authenticator)
 
-#### 设置构建参数（仅需一次）:
+### 部署后配置
 
-- Framework preset: 选 None。
-- Build command: 填 npm run build:web。
-- Build output directory: 填 web/dist。
-- Root directory: 保持 /。
+部署完成后，需要设置环境变量：
 
-#### 在控制台设置所有密码（不用写在 GitHub）:
+```bash
+# 登录 Cloudflare
+npx wrangler login
 
-- 在同一个部署页面，点击 Environment variables (advanced)。
-- 在这里添加 ADMIN_PASSWORD (值就是你的管理密码)。
-- 在这里添加 PUBLIC_MODE (如果要开启个人模式就填 true)。
+# 设置管理员密码（必须）
+echo -n "你的密码" | npx wrangler secret put ADMIN_PASSWORD
 
-#### 保存并部署:
+# 设置 JWT 密钥（可选，不设置会自动基于密码生成）
+openssl rand -hex 32 | tr -d '\n' | npx wrangler secret put JWT_SECRET
 
-- 点击 Save and Deploy。完成！
+# 个人模式（可选，设置后所有账号直接显示，无需登录）
+echo -n "true" | npx wrangler secret put PUBLIC_MODE
+```
 
 或在 Cloudflare Dashboard 中：
 
