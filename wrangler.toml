@@ -1,0 +1,18 @@
+name = "2fa-authenticator"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+[assets]
+directory = "./web/dist"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+pages_build_output_dir = "web/dist"
+
+[[kv_namespaces]]
+binding = "KV"
+# 部署说明：
+# 1. 如果你在控制台手动绑定，这里可以暂时留空或填入任意 ID
+# 2. 部署完成后，请前往 Cloudflare 控制台：
+#    Settings -> Variables -> KV Namespace Bindings
+#    将 "KV" 名字绑定到你创建的真实 KV 空间。
+id = "PLACEHOLDER_ID"
