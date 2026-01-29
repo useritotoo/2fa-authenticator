@@ -51,17 +51,7 @@
 部署完成后，需要设置环境变量：
 
 ```bash
-# 登录 Cloudflare
-npx wrangler login
 
-# 设置管理员密码（必须）
-echo -n "你的密码" | npx wrangler secret put ADMIN_PASSWORD
-
-# 设置 JWT 密钥（可选，不设置会自动基于密码生成）
-openssl rand -hex 32 | tr -d '\n' | npx wrangler secret put JWT_SECRET
-
-# 个人模式（可选，设置后所有账号直接显示，无需登录）
-echo -n "true" | npx wrangler secret put PUBLIC_MODE
 ```
 
 或在 Cloudflare Dashboard 中：
@@ -72,19 +62,36 @@ echo -n "true" | npx wrangler secret put PUBLIC_MODE
    - `JWT_SECRET`: JWT 密钥（可选，推荐设置以增强安全性）
    - `PUBLIC_MODE`: 设为 `true` 启用个人模式（可选）
 
-### 自定义域名
+## 构建与部署
+2. 创建 Cloudflare Pages 项目
+登录 Cloudflare Dashboard。
+进入 Workers & Pages -> Overview。
+点击 Create Application -> Pages -> Connect to Git。
+选择你的 GitHub 仓库和分支。
+3. 构建配置 (Build Settings)
+在 "Set up builds and deployments" 页面，进行如下配置：
 
-在 `wrangler.toml` 中配置：
+设置项	值	说明
+Framework preset	None	我们自定义了构建脚本，不需要预设
+Build command	npm run build	此命令会同时构建 Vue 前端和 Worker
+Build output directory	web/dist	构建产物的输出目录
+点击 Save and Deploy 开始第一次构建。
 
-```toml
-[[routes]]
-pattern = "2fa.example.com"
-custom_domain = true
-```
+4. 环境变量与 KV (CRITICAL)
+第一次部署通常会成功（因为代码不依赖 KV 启动），但运行时会报错。你需要立即配置后台：
 
-或在 Cloudflare Dashboard 中：
-1. 进入 **Workers & Pages** > **你的 Worker** > **Settings** > **Triggers**
-2. 在 **Custom Domains** 部分添加域名
+等待项目创建完成，进入项目主页。
+点击顶部标签栏的 Settings -> Functions。 3.配置以下内容：
+KV Namespace Bindings
+点击 Add binding
+Variable name: KV (必须完全一致)
+KV Namespace: 选择你的 KV 数据库
+Environment Variables
+添加 ADMIN_PASSWORD (选择 Production environment)
+添加 JWT_SECRET (建议 Encrypt)
+TIP
+
+配置完成后，你需要重新部署一次才能生效。 可以在 "Deployments" 标签页点击最新的部署右侧的三个点 -> Retry deployment。
 
 ## 多环境部署
 
