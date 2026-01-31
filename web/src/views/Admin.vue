@@ -27,22 +27,8 @@
     <div v-else class="pb-20">
       <!-- 顶部标题栏 + 操作按钮 -->
       <div class="sticky top-0 z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm px-4 py-3 mb-4 -mx-4 sm:mx-0 sm:rounded-lg transition-colors">
-        <div class="flex justify-between items-center gap-4">
-          <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 flex-shrink-0">账号管理</h2>
-          <!-- 搜索框 -->
-          <div class="flex-1 max-w-md relative hidden sm:block">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </div>
-            <input
-              v-model="searchQuery"
-              type="text"
-              placeholder="搜索账号或发行方..."
-              class="block w-full pl-9 pr-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg leading-5 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm transition-all"
-            />
-          </div>
+        <div class="flex justify-between items-center">
+          <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">账号管理</h2>
           <div class="flex items-center gap-1">
             <!-- 扫码添加 -->
             <button
@@ -110,20 +96,6 @@
               </div>
             </div>
           </div>
-        </div>
-        <!-- 移动端搜索框 -->
-        <div class="mt-3 sm:hidden relative px-4 pb-2">
-          <div class="absolute inset-y-0 left-4 pl-3 flex items-center pointer-events-none">
-            <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          </div>
-          <input
-            v-model="searchQuery"
-            type="text"
-            placeholder="搜索账号或发行方..."
-            class="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg leading-5 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm transition-all"
-          />
         </div>
       </div>
 
@@ -214,14 +186,12 @@
               class="relative bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden group hover:border-blue-300 dark:hover:border-blue-600 transition-colors"
             >
               <!-- 右上角标签 -->
-              <button
-                @click="togglePublic(account)"
-                class="absolute top-2 right-2 px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wide transition-colors hover:scale-105 active:scale-95"
+              <div
+                class="absolute top-2 right-2 px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wide"
                 :class="account.isPublic ? 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400' : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'"
-                :title="account.isPublic ? '点击设为隐私' : '点击设为公开'"
               >
                 {{ account.isPublic ? '公开' : '隐私' }}
-              </button>
+              </div>
               <div class="p-3">
                 <div class="flex items-start gap-3">
                   <input
@@ -382,7 +352,6 @@ admin@company.com, GitHub, HXDMVJECJJWSRB3H"
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">账号名称</label>
             <input
               v-model="form.name"
-              ref="nameInput"
               type="text"
               required
               placeholder="例如: Google - work@company.com"
@@ -559,20 +528,12 @@ const accounts = ref<Account[]>([]);
 const loading = ref(true);
 const selectedIds = ref<Set<string>>(new Set());
 const showMoreMenu = ref(false);
-const searchQuery = ref('');
-const nameInput = ref<HTMLInputElement | null>(null);
 
 // 按 issuer 分组的账号列表
 const groupedAccounts = computed(() => {
   const groups: { [key: string]: Account[] } = {};
 
-  const filtered = accounts.value.filter(account => {
-    const query = searchQuery.value.toLowerCase().trim();
-    if (!query) return true;
-    return account.name.toLowerCase().includes(query) || (account.issuer && account.issuer.toLowerCase().includes(query));
-  });
-
-  for (const account of filtered) {
+  for (const account of accounts.value) {
     const issuer = account.issuer || '其他';
     if (!groups[issuer]) {
       groups[issuer] = [];
@@ -652,23 +613,13 @@ async function fetchAccounts() {
 }
 
 function editAccount(account: Account) {
-  editingAccount.value = { ...account };
+  editingAccount.value = account;
   form.value = {
     name: account.name,
     issuer: account.issuer,
     secret: account.secret,
     isPublic: account.isPublic ?? false,
   };
-  nextTick(() => nameInput.value?.focus());
-}
-
-async function togglePublic(account: Account) {
-  try {
-    await updateAccount(account.id, { ...account, isPublic: !account.isPublic });
-    await fetchAccounts();
-  } catch (e) {
-    alert((e as Error).message);
-  }
 }
 
 function closeForm() {
