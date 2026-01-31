@@ -21,10 +21,7 @@
       </button>
     </div>
     <div class="flex items-center justify-between">
-      <div
-        class="text-2xl sm:text-xl font-mono font-bold tracking-wider transition-all duration-200 transform"
-        :class="[copied ? 'text-green-600 dark:text-green-400 scale-110' : 'text-blue-600 dark:text-blue-400 scale-100']"
-      >
+      <div class="text-2xl sm:text-xl font-mono font-bold text-blue-600 dark:text-blue-400 tracking-wider">
         {{ formattedCode }}
       </div>
       <div class="flex items-center gap-2">
