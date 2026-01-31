@@ -1,25 +1,68 @@
 <template>
   <div>
     <!-- 使用说明 -->
-    <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-      <h3 class="font-medium text-blue-800 mb-2">使用说明</h3>
-      <ul class="text-sm text-blue-700 space-y-1">
-        <li>1. 点击验证码卡片右上角的复制按钮，即可复制当前验证码</li>
-        <li>2. 点击账号名称可快速复制账号名</li>
-        <li>3. 验证码每 30 秒自动刷新，右侧圆环显示剩余时间</li>
-        <li>4. 圆环变红表示验证码即将过期，请等待新码生成后再使用</li>
-        <li>5. 下方可输入临时密钥获取一次性验证码</li>
-      </ul>
+    <div class="mb-4">
+      <button
+        @click="isInstructionsCollapsed = !isInstructionsCollapsed"
+        class="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 transition-colors"
+      >
+        <svg
+          class="w-4 h-4 transition-transform"
+          :class="{ 'rotate-180': isInstructionsCollapsed }"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+        </svg>
+        {{ isInstructionsCollapsed ? '显示使用说明' : '隐藏使用说明' }}
+      </button>
+      <div v-show="!isInstructionsCollapsed" class="mt-2 p-4 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg">
+        <h3 class="font-medium text-blue-800 dark:text-blue-300 mb-2">使用说明</h3>
+        <ul class="text-sm text-blue-700 dark:text-blue-400 space-y-1">
+          <li>1. 点击验证码卡片右上角的复制按钮，即可复制当前验证码</li>
+          <li>2. 点击账号名称可快速复制账号名</li>
+          <li>3. 验证码每 30 秒自动刷新，右侧圆环显示剩余时间</li>
+          <li>4. 圆环变红表示验证码即将过期，请等待新码生成后再使用</li>
+          <li>5. 下方可输入临时密钥获取一次性验证码</li>
+          <li>6. 右下角按钮可切换深色/浅色模式，支持跟随系统</li>
+        </ul>
+      </div>
     </div>
 
-    <div v-if="loading" class="text-center py-8 text-gray-500">加载中...</div>
-    <div v-else-if="error" class="text-center py-8 text-red-500">{{ error }}</div>
-    <div v-else-if="accounts.length === 0" class="text-center py-8 text-gray-500">
+    <!-- 搜索栏 -->
+    <div class="mb-6 relative">
+      <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+        <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+      </div>
+      <input
+        v-model="searchQuery"
+        ref="searchInput"
+        type="text"
+        placeholder="搜索账号或发行方... (按 / 聚焦)"
+        class="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg leading-5 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-sm transition-all"
+      />
+      <button
+        v-if="searchQuery"
+        @click="searchQuery = ''"
+        class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+      >
+        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <div v-if="loading" class="text-center py-8 text-gray-500 dark:text-gray-400">加载中...</div>
+    <div v-else-if="error" class="text-center py-8 text-red-500 dark:text-red-400">{{ error }}</div>
+    <div v-else-if="accounts.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-400">
       暂无账号，请联系管理员添加
     </div>
     <div v-else class="space-y-6">
       <div v-for="group in groupedAccounts" :key="group.issuer">
-        <h3 class="text-sm font-medium text-gray-500 mb-2 px-1">{{ group.issuer }}</h3>
+        <h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2 px-1">{{ group.issuer }}</h3>
         <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           <AccountCard
             v-for="account in group.accounts"
@@ -33,14 +76,14 @@
     </div>
 
     <!-- 临时验证码查询 -->
-    <div class="mt-8 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-      <h3 class="font-medium text-gray-800 mb-3">临时验证码查询</h3>
+    <div class="mt-8 p-4 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
+      <h3 class="font-medium text-gray-800 dark:text-gray-200 mb-3">临时验证码查询</h3>
       <div class="flex gap-3">
         <input
           v-model="tempSecret"
           type="text"
           placeholder="输入密钥 (Base32 格式)"
-          class="flex-1 px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
+          class="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
         />
         <button
           @click="generateTempCode"
@@ -49,8 +92,8 @@
           获取验证码
         </button>
       </div>
-      <div v-if="tempCode" class="mt-4 p-3 bg-white border rounded-lg flex items-center justify-between">
-        <div class="text-2xl font-mono font-bold text-blue-600 tracking-wider">
+      <div v-if="tempCode" class="mt-4 p-3 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg flex items-center justify-between">
+        <div class="text-2xl font-mono font-bold text-blue-600 dark:text-blue-400 tracking-wider">
           {{ tempCodeFormatted }}
         </div>
         <div class="flex items-center gap-3">
@@ -63,7 +106,7 @@
                   cy="16"
                   r="14"
                   fill="none"
-                  stroke="#e5e7eb"
+                  class="stroke-gray-200 dark:stroke-gray-600"
                   stroke-width="3"
                 />
                 <circle
@@ -83,7 +126,7 @@
           </div>
           <button
             @click="copyTempCode"
-            class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded"
+            class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 rounded"
             title="复制验证码"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -92,8 +135,8 @@
           </button>
         </div>
       </div>
-      <div v-if="tempCopied" class="mt-2 text-xs text-green-600">已复制</div>
-      <div v-if="tempError" class="mt-3 text-red-500 text-sm">{{ tempError }}</div>
+      <div v-if="tempCopied" class="mt-2 text-xs text-green-600 dark:text-green-400">已复制</div>
+      <div v-if="tempError" class="mt-3 text-red-500 dark:text-red-400 text-sm">{{ tempError }}</div>
     </div>
   </div>
 </template>
@@ -109,10 +152,34 @@ const remainingMap = ref<Record<string, number>>({});
 const loading = ref(true);
 const error = ref('');
 
-// 按 issuer 分组
+// 搜索与折叠状态
+const searchQuery = ref('');
+const searchInput = ref<HTMLInputElement | null>(null);
+const isInstructionsCollapsed = ref(localStorage.getItem('hideInstructions') === 'true');
+
+function toggleInstructions() {
+  isInstructionsCollapsed.value = !isInstructionsCollapsed.value;
+  localStorage.setItem('hideInstructions', String(isInstructionsCollapsed.value));
+}
+
+// 监听键盘事件 (/)
+function handleKeyDown(e: KeyboardEvent) {
+  if (e.key === '/' && document.activeElement?.tagName !== 'INPUT' && document.activeElement?.tagName !== 'TEXTAREA') {
+    e.preventDefault();
+    searchInput.value?.focus();
+  }
+}
+
+// 按 issuer 分组并过滤
 const groupedAccounts = computed(() => {
+  const filtered = accounts.value.filter(acc => {
+    const query = searchQuery.value.toLowerCase().trim();
+    if (!query) return true;
+    return acc.name.toLowerCase().includes(query) || (acc.issuer && acc.issuer.toLowerCase().includes(query));
+  });
+
   const groups: Record<string, AccountWithCode[]> = {};
-  for (const acc of accounts.value) {
+  for (const acc of filtered) {
     const issuer = acc.issuer || '其他';
     if (!groups[issuer]) {
       groups[issuer] = [];
@@ -231,10 +298,12 @@ onMounted(() => {
   timer = window.setInterval(tick, 1000);
   // 每 30 秒强制刷新一次
   refreshTimer = window.setInterval(fetchAccounts, 30000);
+  window.addEventListener('keydown', handleKeyDown);
 });
 
 onUnmounted(() => {
   if (timer) clearInterval(timer);
   if (refreshTimer) clearInterval(refreshTimer);
+  window.removeEventListener('keydown', handleKeyDown);
 });
 </script>

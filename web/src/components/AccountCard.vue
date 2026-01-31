@@ -1,18 +1,18 @@
 <template>
-  <div class="p-3 sm:p-2 border rounded-lg bg-white shadow-sm hover:shadow-md transition-shadow">
+  <div class="p-3 sm:p-2 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 shadow-sm hover:shadow-md transition-shadow">
     <div :class="['flex justify-between items-start gap-2', hideIssuer ? 'mb-1' : 'mb-2']">
       <div class="min-w-0 flex-1">
-        <div v-if="!hideIssuer" class="text-sm text-gray-500">{{ account.issuer || 'Unknown' }}</div>
+        <div v-if="!hideIssuer" class="text-sm text-gray-500 dark:text-gray-400">{{ account.issuer || 'Unknown' }}</div>
         <div
-          class="font-semibold text-gray-800 text-sm sm:text-base truncate cursor-pointer hover:text-blue-600"
+          class="font-semibold text-gray-800 dark:text-gray-100 text-sm sm:text-base truncate cursor-pointer hover:text-blue-600 dark:hover:text-blue-400"
           :title="account.name"
           @click="copyName"
         >{{ account.name }}</div>
-        <div v-if="nameCopied" class="text-xs text-green-600">已复制</div>
+        <div v-if="nameCopied" class="text-xs text-green-600 dark:text-green-400">已复制</div>
       </div>
       <button
         @click="copyCode"
-        class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded flex-shrink-0"
+        class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded flex-shrink-0"
         title="复制验证码"
       >
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -21,7 +21,10 @@
       </button>
     </div>
     <div class="flex items-center justify-between">
-      <div class="text-2xl sm:text-xl font-mono font-bold text-blue-600 tracking-wider">
+      <div
+        class="text-2xl sm:text-xl font-mono font-bold tracking-wider transition-all duration-200 transform"
+        :class="[copied ? 'text-green-600 dark:text-green-400 scale-110' : 'text-blue-600 dark:text-blue-400 scale-100']"
+      >
         {{ formattedCode }}
       </div>
       <div class="flex items-center gap-2">
@@ -33,7 +36,7 @@
               cy="16"
               r="14"
               fill="none"
-              stroke="#e5e7eb"
+              class="stroke-gray-200 dark:stroke-gray-600"
               stroke-width="3"
             />
             <circle
@@ -52,7 +55,7 @@
         </div>
       </div>
     </div>
-    <div v-if="copied" class="text-xs text-green-600 mt-1">已复制</div>
+    <div v-if="copied" class="text-xs text-green-600 dark:text-green-400 mt-1">已复制</div>
   </div>
 </template>
 

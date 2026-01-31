@@ -48,6 +48,10 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   });
 
   if (!res.ok) {
+    // Token 过期或无效时自动清除
+    if (res.status === 401 && authToken) {
+      setToken(null);
+    }
     const error = await res.json().catch(() => ({ error: 'Request failed' }));
     throw new Error(error.error || 'Request failed');
   }

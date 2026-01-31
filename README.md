@@ -1,6 +1,6 @@
 # 2FA 验证码共享工具
 
-基于 Cloudflare Worker 的 TOTP 验证码生成器，支持团队共享和个人使用两种模式。
+基于 Cloudflare Worker 的 TOTP 验证码生成器，支持团队共享和个人使用两种模式。本仓库基于https://github.com/zhifu1996/2fa-authenticator 简化cloudflare部署，适合界面极简，部署简单。懒人必备。
 
 ## 功能特性
 
@@ -42,156 +42,86 @@
 - 设置 `PUBLIC_MODE=true` 启用
 - 适合：个人 2FA 备份、快速查看验证码
 
-## 一键部署
+## 部署指南 (Cloudflare Pages)
 
-[![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/zhifu1996/2fa-authenticator)
+本项目现已全面适配 **Cloudflare Pages (Advanced Mode)**，推荐使用 **GitHub 集成** 实现全自动构建与部署。
 
-### 部署后配置
+### 1. 准备工作
 
-部署完成后，需要设置环境变量：
+1. Fork 本仓库到你的 GitHub 账号。
+2. 确保已安装 Node.js 18+ (如果需要本地构建)。
 
-```bash
+### 2. 自动构建 (CI/CD)
 
-```
+1. 登录 Cloudflare Dashboard。
+2. 进入 **Workers & Pages** > **Overview**。
+3. 点击 **Create Application** > **Pages** > **Connect to Git**。
+4. 选择你的 GitHub 仓库 (`2fa-authenticator`)。
+5. 在 **Set up builds and deployments** 页面：
+   - **Framework preset**: `None`
+   - **Build command**: `npm run build`
+   - **Build output directory**: `web/dist`
+6. 点击 **Save and Deploy**。
 
-或在 Cloudflare Dashboard 中：
+> [!NOTE]
+> 首次部署可能会显示成功，但访问时会报错，因为尚未配置数据库和环境变量。请继续执行下一步。
 
-1. 进入 **Workers & Pages** > **2fa-authenticator** > **Settings** > **Variables**
-2. 添加以下 Secrets：
-   - `ADMIN_PASSWORD`: 管理员密码（必须）
-   - `JWT_SECRET`: JWT 密钥（可选，推荐设置以增强安全性）
-   - `PUBLIC_MODE`: 设为 `true` 启用个人模式（可选）
+### 3. 环境配置 (CRITICAL)
 
-## 构建与部署
-2. 创建 Cloudflare Pages 项目
-登录 Cloudflare Dashboard。
-进入 Workers & Pages -> Overview。
-点击 Create Application -> Pages -> Connect to Git。
-选择你的 GitHub 仓库和分支。
-3. 构建配置 (Build Settings)
-在 "Set up builds and deployments" 页面，进行如下配置：
+部署完成后，进入项目主页，点击顶部 **Settings** > **Functions**，配置以下内容：
 
-设置项	值	说明
-Framework preset	None	我们自定义了构建脚本，不需要预设
-Build command	npm run build	此命令会同时构建 Vue 前端和 Worker
-Build output directory	web/dist	构建产物的输出目录
-点击 Save and Deploy 开始第一次构建。
+#### A.KV 数据库绑定 (必填)
 
-4. 环境变量与 KV (CRITICAL)
-第一次部署通常会成功（因为代码不依赖 KV 启动），但运行时会报错。你需要立即配置后台：
+1. 在 **KV Namespace Bindings** 区域，点击 **Add binding**。
+2. **Variable name**: `KV` (必须完全一致，注意大写)。
+3. **KV Namespace**: 选择一个现有的 KV 或新建一个 (建议命名为 `2fa-kv`)。
 
-等待项目创建完成，进入项目主页。
-点击顶部标签栏的 Settings -> Functions。 3.配置以下内容：
-KV Namespace Bindings
-点击 Add binding
-Variable name: KV (必须完全一致)
-KV Namespace: 选择你的 KV 数据库
-Environment Variables
-添加 ADMIN_PASSWORD (选择 Production environment)
-添加 JWT_SECRET (建议 Encrypt)
-TIP
+#### B. 环境变量 (Secrets)
 
-配置完成后，你需要重新部署一次才能生效。 可以在 "Deployments" 标签页点击最新的部署右侧的三个点 -> Retry deployment。
+在 **Environment Variables** 区域，根据你的需求添加变量：
 
-## 多环境部署
+| 变量名 | 必填 | 示例值 | 说明 |
+| :--- | :--- | :--- | :--- |
+| `ADMIN_PASSWORD` | 是 | `your-password` | 管理员后台登录密码 (建议点击 Encrypt 加密) |
+| `JWT_SECRET` | 否 | `random-string` | 用于生成 Token 的密钥，增加安全性 (建议 Encrypt) |
+| `PUBLIC_MODE` | 否 | `true` | **个人模式开关**。设为 `true` 则无需登录直接显示所有账号 |
 
-可以同时部署团队版和个人版，使用不同的 KV 存储：
+### 4. 完成部署
 
-```toml
-# wrangler.toml
+配置完成后，必须**重新部署**才能生效：
+- 进入 **Deployments** 标签页。
+- 找到最新的部署记录，点击右侧 `...` > **Retry deployment**。
 
-# 团队版（默认）
-name = "2fa-worker"
-[[kv_namespaces]]
-binding = "KV"
-id = "your-team-kv-id"
+## 多环境部署 (个人版 vs 团队版)
 
-[[routes]]
-pattern = "2fa-team.example.com"
-custom_domain = true
+你可以通过创建多个 Cloudflare Pages 项目来实现多环境部署（例如一个公司用，一个个人用）：
 
-# 个人版
-[env.personal]
-name = "2fa-personal"
+1. 在 Cloudflare Pages 创建两个不同的项目 (例如 `2fa-team` 和 `2fa-personal`)，连接同一个 GitHub 仓库。
+2. 分别为两个项目配置不同的 **KV Namespace**。
+3. **团队版配置**：不设置 `PUBLIC_MODE` 或设为 `false`。
+4. **个人版配置**：设置环境变量 `PUBLIC_MODE = true`。
 
-[[env.personal.kv_namespaces]]
-binding = "KV"
-id = "your-personal-kv-id"
+这样，两个环境互不干扰，数据隔离，且代码完全共用。
 
-[[env.personal.routes]]
-pattern = "2fa.example.com"
-custom_domain = true
-```
 
-部署命令：
-```bash
-# 部署团队版
-npx wrangler deploy
-
-# 部署个人版
-npx wrangler deploy --env personal
-
-# 为个人版设置 secrets
-echo -n "true" | npx wrangler secret put PUBLIC_MODE --env personal
-echo -n "密码" | npx wrangler secret put ADMIN_PASSWORD --env personal
-```
-
-## 手动部署
-
-### 1. 克隆项目
-
-```bash
-git clone https://github.com/zhifu1996/2fa-authenticator.git
-cd 2fa-authenticator
-```
-
-### 2. 安装依赖
-
-```bash
-npm install
-cd web && npm install && cd ..
-```
-
-### 3. 创建 KV 并配置
-
-```bash
-# 登录 Cloudflare
-npx wrangler login
-
-# 创建 KV namespace
-npx wrangler kv:namespace create "KV"
-# 将输出的 id 填入 wrangler.toml
-```
-
-### 4. 构建前端
-
-```bash
-cd web && npm run build && cd ..
-```
-
-### 5. 部署
-
-```bash
-# 设置密码（必须）
-echo -n "你的密码" | npx wrangler secret put ADMIN_PASSWORD
-
-# 设置 JWT 密钥（可选）
-openssl rand -hex 32 | tr -d '\n' | npx wrangler secret put JWT_SECRET
-
-# 部署
-npx wrangler deploy
-```
 
 ## 本地开发
 
-```bash
-# 终端 1: 启动 API 模拟服务器
-node dev-server.mjs
+1. **配置环境**
+   复制 `wrangler.toml.bak` 为 `wrangler.toml` (如果需要本地调试 Worker):
+   ```bash
+   cp wrangler.toml.bak wrangler.toml
+   ```
 
-# 终端 2: 启动前端
-cd web
-npm run dev
-```
+2. **启动服务**
+   ```bash
+   # 终端 1: 启动 API 模拟服务器/Worker
+   npm run dev
+
+   # 终端 2: 启动前端 (开发模式)
+   cd web
+   npm run dev
+   ```
 
 访问 http://localhost:5173 ，默认管理员密码：`admin123`
 

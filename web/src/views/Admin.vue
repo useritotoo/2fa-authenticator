@@ -2,17 +2,17 @@
   <div>
     <!-- 登录表单 -->
     <div v-if="!isLoggedIn" class="max-w-sm mx-auto">
-      <h2 class="text-xl font-bold mb-4 text-center">管理员登录</h2>
+      <h2 class="text-xl font-bold mb-4 text-center text-gray-800 dark:text-gray-100">管理员登录</h2>
       <form @submit.prevent="handleLogin" class="space-y-4">
         <div>
           <input
             v-model="password"
             type="password"
             placeholder="请输入管理员密码"
-            class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
           />
         </div>
-        <div v-if="loginError" class="text-red-500 text-sm">{{ loginError }}</div>
+        <div v-if="loginError" class="text-red-500 dark:text-red-400 text-sm">{{ loginError }}</div>
         <button
           type="submit"
           :disabled="loginLoading"
@@ -26,14 +26,28 @@
     <!-- 管理后台 -->
     <div v-else class="pb-20">
       <!-- 顶部标题栏 + 操作按钮 -->
-      <div class="sticky top-0 z-30 bg-white border-b shadow-sm px-4 py-3 mb-4 -mx-4 sm:mx-0 sm:rounded-lg">
-        <div class="flex justify-between items-center">
-          <h2 class="text-xl font-bold text-gray-800">账号管理</h2>
+      <div class="sticky top-0 z-30 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm px-4 py-3 mb-4 -mx-4 sm:mx-0 sm:rounded-lg transition-colors">
+        <div class="flex justify-between items-center gap-4">
+          <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 flex-shrink-0">账号管理</h2>
+          <!-- 搜索框 -->
+          <div class="flex-1 max-w-md relative hidden sm:block">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+            <input
+              v-model="searchQuery"
+              type="text"
+              placeholder="搜索账号或发行方..."
+              class="block w-full pl-9 pr-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg leading-5 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm transition-all"
+            />
+          </div>
           <div class="flex items-center gap-1">
             <!-- 扫码添加 -->
             <button
               @click="startQrScan"
-              class="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+              class="p-2 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/30 rounded-lg transition-colors"
               title="扫码添加"
             >
               <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -43,7 +57,7 @@
             <!-- 手动添加 -->
             <button
               @click="showAddForm = true"
-              class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+              class="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors"
               title="手动添加"
             >
               <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -54,7 +68,7 @@
             <div class="relative">
               <button
                 @click="showMoreMenu = !showMoreMenu"
-                class="p-2 text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
+                class="p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
               >
                 <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
@@ -63,11 +77,11 @@
               <!-- 更多菜单下拉 -->
               <div
                 v-if="showMoreMenu"
-                class="absolute right-0 mt-1 w-36 bg-white rounded-lg shadow-lg border py-1 z-50"
+                class="absolute right-0 mt-1 w-36 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50"
               >
                 <button
                   @click="showImportForm = true; showMoreMenu = false"
-                  class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                  class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
                 >
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
@@ -76,17 +90,17 @@
                 </button>
                 <button
                   @click="showExportForm = true; showMoreMenu = false"
-                  class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                  class="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2"
                 >
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                   </svg>
                   导出
                 </button>
-                <div class="border-t my-1"></div>
+                <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
                 <button
                   @click="handleLogout(); showMoreMenu = false"
-                  class="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                  class="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 flex items-center gap-2"
                 >
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -97,20 +111,34 @@
             </div>
           </div>
         </div>
+        <!-- 移动端搜索框 -->
+        <div class="mt-3 sm:hidden relative px-4 pb-2">
+          <div class="absolute inset-y-0 left-4 pl-3 flex items-center pointer-events-none">
+            <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+          <input
+            v-model="searchQuery"
+            type="text"
+            placeholder="搜索账号或发行方..."
+            class="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg leading-5 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm transition-all"
+          />
+        </div>
       </div>
 
       <!-- 批量操作浮动栏（选中时显示） -->
       <div
         v-if="selectedIds.size > 0"
-        class="fixed bottom-4 left-4 right-4 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 bg-white rounded-2xl shadow-lg border px-3 py-2 z-40"
+        class="fixed bottom-4 left-4 right-4 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 px-3 py-2 z-40"
       >
         <div class="flex items-center justify-between gap-2">
           <!-- 左侧：选中数量 + 取消 -->
           <div class="flex items-center gap-2 flex-shrink-0">
-            <span class="text-sm font-medium text-gray-700">{{ selectedIds.size }}</span>
+            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ selectedIds.size }}</span>
             <button
               @click="selectedIds = new Set()"
-              class="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              class="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
               title="取消选择"
             >
               <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -122,7 +150,7 @@
           <div class="flex items-center gap-1">
             <button
               @click="handleBatchSetPublic(true)"
-              class="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
+              class="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg transition-colors"
               title="设为公开"
             >
               <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -133,7 +161,7 @@
             </button>
             <button
               @click="handleBatchSetPublic(false)"
-              class="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              class="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
               title="设为隐私"
             >
               <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -143,7 +171,7 @@
             </button>
             <button
               @click="handleBatchDelete()"
-              class="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              class="flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
               title="删除"
             >
               <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -156,19 +184,19 @@
       </div>
 
       <!-- 账号列表 -->
-      <div v-if="loading" class="text-center py-8 text-gray-500">加载中...</div>
-      <div v-else-if="accounts.length === 0" class="text-center py-8 text-gray-500">
+      <div v-if="loading" class="text-center py-8 text-gray-500 dark:text-gray-400">加载中...</div>
+      <div v-else-if="accounts.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-400">
         暂无账号
       </div>
       <div v-else class="space-y-6">
         <!-- 全选 -->
         <div class="flex items-center gap-3 px-2">
-          <label class="flex items-center gap-2 cursor-pointer text-gray-600 select-none">
+          <label class="flex items-center gap-2 cursor-pointer text-gray-600 dark:text-gray-400 select-none">
             <input
               type="checkbox"
               :checked="selectedIds.size === accounts.length && accounts.length > 0"
               @change="toggleSelectAll"
-              class="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 transition-colors"
+              class="w-5 h-5 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 transition-colors bg-white dark:bg-gray-700"
             />
             <span class="text-sm">全选所有账号</span>
           </label>
@@ -183,33 +211,35 @@
             <div
               v-for="account in group.accounts"
               :key="account.id"
-              class="relative bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden group hover:border-blue-300 transition-colors"
+              class="relative bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden group hover:border-blue-300 dark:hover:border-blue-600 transition-colors"
             >
               <!-- 右上角标签 -->
-              <div
-                class="absolute top-2 right-2 px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wide"
-                :class="account.isPublic ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'"
+              <button
+                @click="togglePublic(account)"
+                class="absolute top-2 right-2 px-1.5 py-0.5 rounded text-[10px] font-bold tracking-wide transition-colors hover:scale-105 active:scale-95"
+                :class="account.isPublic ? 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400' : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'"
+                :title="account.isPublic ? '点击设为隐私' : '点击设为公开'"
               >
                 {{ account.isPublic ? '公开' : '隐私' }}
-              </div>
+              </button>
               <div class="p-3">
                 <div class="flex items-start gap-3">
                   <input
                     type="checkbox"
                     :checked="selectedIds.has(account.id)"
                     @change="toggleSelect(account.id)"
-                    class="mt-1 w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 flex-shrink-0"
+                    class="mt-1 w-5 h-5 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500 flex-shrink-0 bg-white dark:bg-gray-700"
                   />
                   <div class="flex-1 min-w-0 pr-10">
-                    <div class="font-bold text-gray-900 truncate mb-0.5">{{ account.name }}</div>
+                    <div class="font-bold text-gray-900 dark:text-gray-100 truncate mb-0.5">{{ account.name }}</div>
                     <div class="font-mono text-xs text-gray-400 truncate">{{ account.secret }}</div>
                   </div>
                 </div>
                 <!-- 操作按钮 -->
-                <div class="mt-3 pt-2 border-t border-gray-100 flex justify-end gap-1">
+                <div class="mt-3 pt-2 border-t border-gray-100 dark:border-gray-700 flex justify-end gap-1">
                   <button
                     @click="editAccount(account)"
-                    class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors flex items-center gap-1 text-xs"
+                    class="p-1.5 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-colors flex items-center gap-1 text-xs"
                   >
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -218,7 +248,7 @@
                   </button>
                   <button
                     @click="handleDelete(account.id)"
-                    class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-1 text-xs"
+                    class="p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors flex items-center gap-1 text-xs"
                   >
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -239,28 +269,28 @@
       class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
       @mousedown.self="showExportForm = false"
     >
-      <div class="bg-white rounded-lg p-6 w-full max-w-sm" @mousedown.stop>
-        <h3 class="text-lg font-bold mb-4">导出账号</h3>
+      <div class="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-sm" @mousedown.stop>
+        <h3 class="text-lg font-bold mb-4 text-gray-900 dark:text-gray-100">导出账号</h3>
         <div class="space-y-4">
           <div>
-            <p class="text-sm text-gray-600 mb-3">
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">
               {{ selectedIds.size > 0 ? `将导出选中的 ${selectedIds.size} 个账号` : `将导出全部 ${accounts.length} 个账号` }}
             </p>
-            <label class="block text-sm font-medium text-gray-700 mb-2">选择格式</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">选择格式</label>
             <div class="grid grid-cols-2 gap-2">
-              <label class="flex items-center gap-2">
+              <label class="flex items-center gap-2 text-gray-700 dark:text-gray-300">
                 <input type="radio" v-model="exportFormat" value="aegis" class="w-4 h-4" />
                 <span class="text-sm">Aegis JSON</span>
               </label>
-              <label class="flex items-center gap-2">
+              <label class="flex items-center gap-2 text-gray-700 dark:text-gray-300">
                 <input type="radio" v-model="exportFormat" value="json" class="w-4 h-4" />
                 <span class="text-sm">简单 JSON</span>
               </label>
-              <label class="flex items-center gap-2">
+              <label class="flex items-center gap-2 text-gray-700 dark:text-gray-300">
                 <input type="radio" v-model="exportFormat" value="tsv" class="w-4 h-4" />
                 <span class="text-sm">TSV (Tab)</span>
               </label>
-              <label class="flex items-center gap-2">
+              <label class="flex items-center gap-2 text-gray-700 dark:text-gray-300">
                 <input type="radio" v-model="exportFormat" value="csv" class="w-4 h-4" />
                 <span class="text-sm">CSV</span>
               </label>
@@ -269,7 +299,7 @@
           <div class="flex gap-3 pt-2">
             <button
               @click="showExportForm = false"
-              class="flex-1 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+              class="flex-1 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600"
             >
               取消
             </button>
@@ -290,16 +320,16 @@
       class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
       @mousedown.self="showImportForm = false; importError = ''"
     >
-      <div class="bg-white rounded-lg p-6 w-full max-w-sm" @mousedown.stop>
-        <h3 class="text-lg font-bold mb-4">导入账号</h3>
+      <div class="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-sm" @mousedown.stop>
+        <h3 class="text-lg font-bold mb-4 text-gray-900 dark:text-gray-100">导入账号</h3>
         <div class="space-y-4">
           <div>
-            <p class="text-sm text-gray-600 mb-3">
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">
               支持 Aegis JSON、简单 JSON、TSV、CSV 格式，自动识别
             </p>
             <div class="flex items-center justify-between mb-2">
-              <label class="block text-sm font-medium text-gray-700">粘贴内容或选择文件</label>
-              <label class="cursor-pointer px-3 py-1 bg-gray-100 text-gray-600 rounded text-sm hover:bg-gray-200">
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">粘贴内容或选择文件</label>
+              <label class="cursor-pointer px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded text-sm hover:bg-gray-200 dark:hover:bg-gray-600">
                 选择文件
                 <input
                   type="file"
@@ -315,15 +345,15 @@
               placeholder="示例：
 user@example.com, Google, JBSWY3DPEHPK3PXP
 admin@company.com, GitHub, HXDMVJECJJWSRB3H"
-              class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
             ></textarea>
           </div>
-          <div v-if="importError" class="text-red-500 text-sm">{{ importError }}</div>
+          <div v-if="importError" class="text-red-500 dark:text-red-400 text-sm">{{ importError }}</div>
           <div class="flex gap-3 pt-2">
             <button
               type="button"
               @click="showImportForm = false; importContent = ''; importError = ''"
-              class="flex-1 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+              class="flex-1 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600"
             >
               取消
             </button>
@@ -345,36 +375,37 @@ admin@company.com, GitHub, HXDMVJECJJWSRB3H"
       class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
       @mousedown.self="closeForm"
     >
-      <div class="bg-white rounded-lg p-6 w-full max-w-md" @mousedown.stop>
-        <h3 class="text-lg font-bold mb-4">{{ editingAccount ? '编辑账号' : '添加账号' }}</h3>
+      <div class="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md" @mousedown.stop>
+        <h3 class="text-lg font-bold mb-4 text-gray-900 dark:text-gray-100">{{ editingAccount ? '编辑账号' : '添加账号' }}</h3>
         <form @submit.prevent="handleSubmit" class="space-y-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">账号名称</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">账号名称</label>
             <input
               v-model="form.name"
+              ref="nameInput"
               type="text"
               required
               placeholder="例如: Google - work@company.com"
-              class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
             />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">发行方 (Issuer)</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">发行方 (Issuer)</label>
             <input
               v-model="form.issuer"
               type="text"
               placeholder="例如: Google, GitHub, AWS"
-              class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
             />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">密钥 (Secret)</label>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">密钥 (Secret)</label>
             <input
               v-model="form.secret"
               type="text"
               required
               placeholder="例如: JBSWY3DPEHPK3PXP"
-              class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
             />
           </div>
           <div>
@@ -384,15 +415,15 @@ admin@company.com, GitHub, HXDMVJECJJWSRB3H"
                 type="checkbox"
                 class="w-4 h-4 rounded"
               />
-              <span class="text-sm text-gray-700">公开显示（未登录时可见）</span>
+              <span class="text-sm text-gray-700 dark:text-gray-300">公开显示（未登录时可见）</span>
             </label>
           </div>
-          <div v-if="formError" class="text-red-500 text-sm">{{ formError }}</div>
+          <div v-if="formError" class="text-red-500 dark:text-red-400 text-sm">{{ formError }}</div>
           <div class="flex gap-3 pt-2">
             <button
               type="button"
               @click="closeForm"
-              class="flex-1 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+              class="flex-1 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600"
             >
               取消
             </button>
@@ -415,22 +446,22 @@ admin@company.com, GitHub, HXDMVJECJJWSRB3H"
       @mousedown.self="stopQrScan"
       @paste="handlePaste"
     >
-      <div class="bg-white rounded-lg p-6 w-full max-w-md" @mousedown.stop>
-        <h3 class="text-lg font-bold mb-4">扫描二维码</h3>
+      <div class="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md" @mousedown.stop>
+        <h3 class="text-lg font-bold mb-4 text-gray-900 dark:text-gray-100">扫描二维码</h3>
         <div class="space-y-4">
           <!-- Tab 切换 -->
-          <div class="flex border-b">
+          <div class="flex border-b border-gray-200 dark:border-gray-700">
             <button
               @click="switchToCamera"
               class="flex-1 py-2 text-sm font-medium border-b-2 -mb-px transition-colors"
-              :class="scanMode === 'camera' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'"
+              :class="scanMode === 'camera' ? 'border-blue-600 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'"
             >
               摄像头扫描
             </button>
             <button
               @click="scanMode = 'image'"
               class="flex-1 py-2 text-sm font-medium border-b-2 -mb-px transition-colors"
-              :class="scanMode === 'image' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'"
+              :class="scanMode === 'image' ? 'border-blue-600 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'"
             >
               上传图片
             </button>
@@ -441,8 +472,8 @@ admin@company.com, GitHub, HXDMVJECJJWSRB3H"
             <!-- 权限提示 -->
             <div v-if="cameraPermissionDenied" class="text-center py-6">
               <div class="text-4xl mb-3">📷</div>
-              <p class="text-gray-700 font-medium mb-1">需要摄像头权限</p>
-              <p class="text-sm text-gray-500 mb-3">请在浏览器设置中允许访问摄像头</p>
+              <p class="text-gray-700 dark:text-gray-300 font-medium mb-1">需要摄像头权限</p>
+              <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">请在浏览器设置中允许访问摄像头</p>
               <button
                 @click="retryQrScan"
                 class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
@@ -457,18 +488,18 @@ admin@company.com, GitHub, HXDMVJECJJWSRB3H"
           <!-- 上传图片内容 -->
           <div v-else class="space-y-4">
             <label
-              class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors cursor-pointer block"
+              class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center hover:border-blue-400 dark:hover:border-blue-500 transition-colors cursor-pointer block"
               @dragover.prevent
               @drop.prevent="handleDrop"
             >
               <div v-if="scanningImage">
                 <div class="text-4xl mb-3">⏳</div>
-                <p class="text-gray-500 animate-pulse">正在识别图片...</p>
+                <p class="text-gray-500 dark:text-gray-400 animate-pulse">正在识别图片...</p>
               </div>
               <div v-else>
                 <div class="text-4xl mb-3">📤</div>
-                <p class="text-gray-700 font-medium mb-1">点击选择图片或拖拽到此处</p>
-                <p class="text-sm text-gray-500">支持 PNG、JPG、WEBP 格式</p>
+                <p class="text-gray-700 dark:text-gray-300 font-medium mb-1">点击选择图片或拖拽到此处</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400">支持 PNG、JPG、WEBP 格式</p>
                 <p class="text-xs text-gray-400 mt-2">也可以直接粘贴 (Ctrl+V / Cmd+V)</p>
               </div>
               <input
@@ -484,13 +515,13 @@ admin@company.com, GitHub, HXDMVJECJJWSRB3H"
           <div id="qr-reader-temp" class="hidden"></div>
 
           <!-- 错误提示 -->
-          <div v-if="qrError && !cameraPermissionDenied" class="text-red-500 text-sm text-center">{{ qrError }}</div>
+          <div v-if="qrError && !cameraPermissionDenied" class="text-red-500 dark:text-red-400 text-sm text-center">{{ qrError }}</div>
 
           <!-- 取消按钮 -->
           <div class="flex gap-3 pt-2">
             <button
               @click="stopQrScan"
-              class="flex-1 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+              class="flex-1 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600"
             >
               取消
             </button>
@@ -528,12 +559,20 @@ const accounts = ref<Account[]>([]);
 const loading = ref(true);
 const selectedIds = ref<Set<string>>(new Set());
 const showMoreMenu = ref(false);
+const searchQuery = ref('');
+const nameInput = ref<HTMLInputElement | null>(null);
 
 // 按 issuer 分组的账号列表
 const groupedAccounts = computed(() => {
   const groups: { [key: string]: Account[] } = {};
 
-  for (const account of accounts.value) {
+  const filtered = accounts.value.filter(account => {
+    const query = searchQuery.value.toLowerCase().trim();
+    if (!query) return true;
+    return account.name.toLowerCase().includes(query) || (account.issuer && account.issuer.toLowerCase().includes(query));
+  });
+
+  for (const account of filtered) {
     const issuer = account.issuer || '其他';
     if (!groups[issuer]) {
       groups[issuer] = [];
@@ -602,19 +641,34 @@ async function fetchAccounts() {
     accounts.value = await getAdminAccounts();
   } catch (e) {
     console.error(e);
+    // Token 过期被清除时，重置登录状态
+    if (!getToken()) {
+      isLoggedIn.value = false;
+      accounts.value = [];
+    }
   } finally {
     loading.value = false;
   }
 }
 
 function editAccount(account: Account) {
-  editingAccount.value = account;
+  editingAccount.value = { ...account };
   form.value = {
     name: account.name,
     issuer: account.issuer,
     secret: account.secret,
     isPublic: account.isPublic ?? false,
   };
+  nextTick(() => nameInput.value?.focus());
+}
+
+async function togglePublic(account: Account) {
+  try {
+    await updateAccount(account.id, { ...account, isPublic: !account.isPublic });
+    await fetchAccounts();
+  } catch (e) {
+    alert((e as Error).message);
+  }
 }
 
 function closeForm() {
