@@ -1,58 +1,16 @@
 <template>
   <div>
     <!-- 使用说明 -->
-    <div class="mb-4">
-      <button
-        @click="isInstructionsCollapsed = !isInstructionsCollapsed"
-        class="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 transition-colors"
-      >
-        <svg
-          class="w-4 h-4 transition-transform"
-          :class="{ 'rotate-180': isInstructionsCollapsed }"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-        </svg>
-        {{ isInstructionsCollapsed ? '显示使用说明' : '隐藏使用说明' }}
-      </button>
-      <div v-show="!isInstructionsCollapsed" class="mt-2 p-4 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg">
-        <h3 class="font-medium text-blue-800 dark:text-blue-300 mb-2">使用说明</h3>
-        <ul class="text-sm text-blue-700 dark:text-blue-400 space-y-1">
-          <li>1. 点击验证码卡片右上角的复制按钮，即可复制当前验证码</li>
-          <li>2. 点击账号名称可快速复制账号名</li>
-          <li>3. 验证码每 30 秒自动刷新，右侧圆环显示剩余时间</li>
-          <li>4. 圆环变红表示验证码即将过期，请等待新码生成后再使用</li>
-          <li>5. 下方可输入临时密钥获取一次性验证码</li>
-          <li>6. 右下角按钮可切换深色/浅色模式，支持跟随系统</li>
-        </ul>
-      </div>
-    </div>
-
-    <!-- 搜索栏 -->
-    <div class="mb-6 relative">
-      <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-        <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
-      </div>
-      <input
-        v-model="searchQuery"
-        ref="searchInput"
-        type="text"
-        placeholder="搜索账号或发行方... (按 / 聚焦)"
-        class="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg leading-5 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 sm:text-sm transition-all"
-      />
-      <button
-        v-if="searchQuery"
-        @click="searchQuery = ''"
-        class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
-      >
-        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
+    <div class="mb-6 p-4 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg">
+      <h3 class="font-medium text-blue-800 dark:text-blue-300 mb-2">使用说明</h3>
+      <ul class="text-sm text-blue-700 dark:text-blue-400 space-y-1">
+        <li>1. 点击验证码卡片右上角的复制按钮，即可复制当前验证码</li>
+        <li>2. 点击账号名称可快速复制账号名</li>
+        <li>3. 验证码每 30 秒自动刷新，右侧圆环显示剩余时间</li>
+        <li>4. 圆环变红表示验证码即将过期，请等待新码生成后再使用</li>
+        <li>5. 下方可输入临时密钥获取一次性验证码</li>
+        <li>6. 右下角按钮可切换深色/浅色模式，支持跟随系统</li>
+      </ul>
     </div>
 
     <div v-if="loading" class="text-center py-8 text-gray-500 dark:text-gray-400">加载中...</div>
@@ -152,34 +110,10 @@ const remainingMap = ref<Record<string, number>>({});
 const loading = ref(true);
 const error = ref('');
 
-// 搜索与折叠状态
-const searchQuery = ref('');
-const searchInput = ref<HTMLInputElement | null>(null);
-const isInstructionsCollapsed = ref(localStorage.getItem('hideInstructions') === 'true');
-
-function toggleInstructions() {
-  isInstructionsCollapsed.value = !isInstructionsCollapsed.value;
-  localStorage.setItem('hideInstructions', String(isInstructionsCollapsed.value));
-}
-
-// 监听键盘事件 (/)
-function handleKeyDown(e: KeyboardEvent) {
-  if (e.key === '/' && document.activeElement?.tagName !== 'INPUT' && document.activeElement?.tagName !== 'TEXTAREA') {
-    e.preventDefault();
-    searchInput.value?.focus();
-  }
-}
-
-// 按 issuer 分组并过滤
+// 按 issuer 分组
 const groupedAccounts = computed(() => {
-  const filtered = accounts.value.filter(acc => {
-    const query = searchQuery.value.toLowerCase().trim();
-    if (!query) return true;
-    return acc.name.toLowerCase().includes(query) || (acc.issuer && acc.issuer.toLowerCase().includes(query));
-  });
-
   const groups: Record<string, AccountWithCode[]> = {};
-  for (const acc of filtered) {
+  for (const acc of accounts.value) {
     const issuer = acc.issuer || '其他';
     if (!groups[issuer]) {
       groups[issuer] = [];
@@ -298,12 +232,10 @@ onMounted(() => {
   timer = window.setInterval(tick, 1000);
   // 每 30 秒强制刷新一次
   refreshTimer = window.setInterval(fetchAccounts, 30000);
-  window.addEventListener('keydown', handleKeyDown);
 });
 
 onUnmounted(() => {
   if (timer) clearInterval(timer);
   if (refreshTimer) clearInterval(refreshTimer);
-  window.removeEventListener('keydown', handleKeyDown);
 });
 </script>
